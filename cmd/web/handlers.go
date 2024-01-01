@@ -5,16 +5,24 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"text/template"
 
 	"github.com/FerMusicComposer/lets-go-snippetbox.git/internal/models"
 )
 
+// home handles the HTTP request for the home page.
+//
+// It checks if the current request URL path exactly matches "/". If it doesn't, it uses
+// the http.NotFound() function to send a 404 response to the client.
+// Importantly, it then returns from the handler. If it doesn't return, the handler
+// would keep executing and also render the contents of the home.html file.
+//
+// Parameters:
+// - w: an http.ResponseWriter object used to write the HTTP response.
+// - r: an *http.Request object representing the HTTP request.
+//
+// Returns:
+// - None.
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	// Check if the current request URL path exactly matches "/". If it doesn't, use
-	// the http.NotFound() function to send a 404 response to the client.
-	// Importantly, we then return from the handler. If we don't return the handler
-	// would keep executing and also write the "Hello from SnippetBox" message.
 	if r.URL.Path != "/" {
 		app.notFound(w)
 		return
@@ -26,34 +34,22 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"../../ui/html/base.html",
-		"../../ui/html/partials/nav.html",
-		"../../ui/html/pages/home.html",
-	}
-
-	tmp, err := template.ParseFiles(files...)
-
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data := &templateData{Snippets: snippets}
-
-	err = tmp.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
+	app.render(w, http.StatusOK, "home.html", &templateData{Snippets: snippets})
 }
 
+// snippetView handles the HTTP request for viewing a snippet.
+//
+// It extracts the value of the id parameter from the query string and tries to convert it
+// to an integer using the strconv.Atoi() function. If it cannot be converted to an integer,
+// or the value is less than 1, it returns a 404 page not found response.
+//
+// Parameters:
+// - w: http.ResponseWriter: the response writer that will be used to write the HTTP response.
+// - r: *http.Request: the HTTP request object that contains the request information.
+//
+// Return:
+// - None.
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
-	// Extract the value of the id parameter from the query string and try to
-	// convert it to an integer using the strconv.Atoi() function. If it can't
-	// be converted to an integer, or the value is less than 1, we return a 404 page
-	// not found response.
-
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 
 	if err != nil || id < 1 {
@@ -71,29 +67,14 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"../../ui/html/base.html",
-		"../../ui/html/partials/nav.html",
-		"../../ui/html/pages/view.html",
-	}
-
-	tmp, err := template.ParseFiles(files...)
-
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data := &templateData{Snippet: snippet}
-
-	err = tmp.ExecuteTemplate(w, "base", data)
-
-	if err != nil {
-		app.serverError(w, err)
-	}
+	app.render(w, http.StatusOK, "view.html", &templateData{Snippet: snippet})
 
 }
 
+// snippetCreate handles the creation of a new snippet.
+//
+// It takes in an http.ResponseWriter and an http.Request as parameters.
+// After creating the snippet, it redirects the user to the snippet view page.
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)

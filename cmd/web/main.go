@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -13,13 +13,14 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// Define an application struct to hold the application-wide dependencies for the
-// web application. For now we'll only include fields for the two custom loggers, but
-// we'll add more to it as the build progresses.
+// The application struct holds the application-wide dependencies for the Snippetbox
+// web application. Its purpose is to facilitate dependency injection thus avoiding
+// code duplication.
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	snippets *models.SnippetModel
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	snippets      *models.SnippetModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -28,12 +29,6 @@ func main() {
 	// flag will be stored in the addr variable at runtime.
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
-
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Current working directory:", dir)
 
 	// Importantly, we use the flag.Parse() function to parse the command-line flag.
 	// This reads in the command-line flag value and assigns it to the addr
@@ -63,10 +58,16 @@ func main() {
 	// before the main() function exits.
 	defer db.Close()
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
-		snippets: &models.SnippetModel{DB: db},
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		snippets:      &models.SnippetModel{DB: db},
+		templateCache: templateCache,
 	}
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so

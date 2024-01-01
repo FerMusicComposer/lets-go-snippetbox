@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -32,6 +33,10 @@ func (app *application) notFound(w http.ResponseWriter) {
 // name (like 'home.tmpl'). If no entry exists in the cache with the provided name,
 // then it creates a new error, calls the serverError() helper method and then returns.
 //
+// If the entry exists, then it is written first into a bytes.Buffer just in case
+// any errors occur at runtime. If there is no problem with the template, then it is
+// written to the http.ResponseWriter via buffer.WriteTo().
+//
 // Parameters:
 //   - w: an http.ResponseWriter object used to write the HTTP response.
 //   - status: an integer representing the HTTP status code.
@@ -49,10 +54,17 @@ func (app *application) render(w http.ResponseWriter, status int, page string, t
 		return
 	}
 
-	w.WriteHeader(status)
+	buf := new(bytes.Buffer)
 
-	err := tmplSet.ExecuteTemplate(w, "base", td)
+	err := tmplSet.ExecuteTemplate(buf, "base", td)
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
+
+	// If the template is written to the buffer without any errors, we are safe
+	// to go ahead and write the HTTP status code to http.ResponseWriter.
+	w.WriteHeader(status)
+
+	buf.WriteTo(w)
 }

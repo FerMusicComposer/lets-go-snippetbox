@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 
 	"github.com/FerMusicComposer/lets-go-snippetbox.git/internal/models"
 )
@@ -11,8 +12,23 @@ import (
 // The Snippet field is a pointer to a models.Snippet object, and the Snippets field
 // is a slice of models.Snippet objects.
 type templateData struct {
-	Snippet  *models.Snippet
-	Snippets []*models.Snippet
+	CurrentYear int
+	Snippet     *models.Snippet
+	Snippets    []*models.Snippet
+}
+
+// humanDate formats a given time.Time value into a string representation.
+//
+// It takes a time.Time parameter and returns a string.
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:04")
+}
+
+// Initialize a template.FuncMap object and store it in a global variable. This is
+// essentially a string-keyed map which acts as a lookup between the names of our
+// custom template functions and the functions themselves.
+var functions = template.FuncMap{
+	"humanDate": humanDate,
 }
 
 // newTemplateCache initializes a new template cache.
@@ -40,8 +56,12 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		//Creates a template set beginning with the base templte, to which all partials and pages will be added dynamically
-		tmplSet, err := template.ParseFiles("../../ui/html/base.html")
+		//Creates a template set beginning with the base template, to which all partials and pages will be added dynamically
+		// The template.FuncMap must be registered with the template set before you
+		// call the ParseFiles() method. This means we have to use template.New() to
+		// create an empty template set, use the Funcs() method to register the
+		// template.FuncMap, and then parse the file as normal.
+		tmplSet, err := template.New(name).Funcs(functions).ParseFiles("../../ui/html/base.html")
 		if err != nil {
 			return nil, err
 		}

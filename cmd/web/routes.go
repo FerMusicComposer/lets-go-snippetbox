@@ -7,6 +7,17 @@ import (
 	"github.com/justinas/alice"
 )
 
+// routes returns an http.Handler that defines the routes for the application.
+//
+// It creates a new httprouter, assigns a custom handler for 404 Not Found
+// responses that wraps the notFound() helper, and sets a custom handler for
+// 405 Method Not Allowed responses. It also sets up a file server for serving
+// static files and defines the routes for various endpoints using the
+// HandlerFunc method. Finally, it creates a middleware chain using alice.New
+// and returns the final handler by chaining the middleware with the router.
+//
+// It does not take any parameters.
+// It returns an http.Handler.
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 

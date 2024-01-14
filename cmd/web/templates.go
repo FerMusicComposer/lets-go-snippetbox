@@ -49,7 +49,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 	// match the pattern "./ui/html/pages/*.html". This will essentially give
 	// us a slice of all the filepaths for our application 'page' templates
 	// like: [ui/html/pages/home.html ui/html/pages/view.html]
-	pages, err := filepath.Glob("../../ui/html/pages/*.html")
+	pages, err := filepath.Glob("./ui/html/pages/*.html")
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +62,12 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		// call the ParseFiles() method. This means we have to use template.New() to
 		// create an empty template set, use the Funcs() method to register the
 		// template.FuncMap, and then parse the file as normal.
-		tmplSet, err := template.New(name).Funcs(functions).ParseFiles("../../ui/html/base.html")
+		tmplSet, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.html")
 		if err != nil {
 			return nil, err
 		}
 
-		tmplSet, err = tmplSet.ParseGlob("../../ui/html/partials/*.html")
+		tmplSet, err = tmplSet.ParseGlob("./ui/html/partials/*.html")
 		if err != nil {
 			return nil, err
 		}

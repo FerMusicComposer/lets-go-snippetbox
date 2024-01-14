@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
 	"time"
+
+	"github.com/go-playground/form/v4"
 )
 
 // The serverError helper writes an error message and stack trace to the errorLog,
@@ -70,8 +73,53 @@ func (app *application) render(w http.ResponseWriter, status int, page string, t
 	buf.WriteTo(w)
 }
 
+// newTemplateData creates a new instance of the templateData struct.
+//
+// It takes a pointer to an http.Request as its parameter and returns a pointer to a templateData struct.
 func (app *application) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear: time.Now().Year(),
 	}
+}
+
+// decodePostForm decodes the form data from the HTTP request and populates the
+// given destination struct.
+//
+// It calls ParseForm() on the request to parse the form data. If there is an
+// error during parsing, it returns the error.
+//
+// Then, it calls Decode() on the form decoder instance, passing the target
+// destination struct and the request's PostForm as parameters. If there is an
+// error during decoding, it checks if the error is of type *form.InvalidDecoderError.
+// If it is, it panics. Otherwise, it returns the error.
+//
+// If everything is successful, it returns nil.
+func (app *application) decodePostForm(r *http.Request, destination any) error {
+	// Call ParseForm() on the request, in the same way that we did in our
+	// createSnippetPost handler.
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	// Call Decode() on our decoder instance, passing the target destination as
+	// the first parameter.
+	err = app.formDecoder.Decode(destination, r.PostForm)
+	if err != nil {
+		// If we try to use an invalid target destination, the Decode() method
+		// will return an error with the type *form.InvalidDecoderError.We use
+		// errors.As() to check for this and raise a panic rather than returning
+		// the error.
+		var InvalidDecoderError *form.InvalidDecoderError
+
+		if errors.As(err, &InvalidDecoderError) {
+			panic(err)
+		}
+
+		// For all other errors, we return them as normal.
+		return err
+
+	}
+
+	return nil
 }

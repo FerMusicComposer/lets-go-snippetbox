@@ -110,7 +110,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 // None.
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
-	// Initialize a new createSnippetForm instance and pass it to the template.
+	// Initialize a new snippetCreateForm instance and pass it to the template.
 	// Notice how this is also a great opportunity to set any default or
 	// 'initial' values for the form --- here we set the initial value for the
 	// snippet expiry to 365 days.

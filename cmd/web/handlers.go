@@ -76,10 +76,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 // - None.
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// When httprouter is parsing a request, the values of any named parameters
-	// will be stored in the request context. We'll talk about request context
-	// in detail later in the book, but for now it's enough to know that you can
-	// use the ParamsFromContext() function to retrieve a slice containing these
-	// parameter names and values like so:
+	// will be stored in the request context.
 	params := httprouter.ParamsFromContext(r.Context())
 
 	// We can then use the ByName() method to get the value of the "id" named

@@ -12,11 +12,12 @@ import (
 // The Snippet field is a pointer to a models.Snippet object, and the Snippets field
 // is a slice of models.Snippet objects.
 type templateData struct {
-	CurrentYear int
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-	Form        any
-	Flash       string
+	CurrentYear     int
+	Snippet         *models.Snippet
+	Snippets        []*models.Snippet
+	Form            any
+	Flash           string
+	IsAuthenticated bool
 }
 
 // humanDate formats a given time.Time value into a string representation.

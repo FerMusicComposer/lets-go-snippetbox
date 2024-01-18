@@ -35,7 +35,7 @@ func (app *application) routes() http.Handler {
 
 	// Create a new middleware chain containing the middleware specific to our
 	// dynamic application routes. The static fileServer is no longer included
-	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf)
+	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
 
 	// Updated these routes to use the new dynamic middleware chain followed by
 	// the appropriate handler function. Note that because the alice ThenFunc()

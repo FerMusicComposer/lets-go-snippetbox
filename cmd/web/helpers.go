@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-playground/form/v4"
+	"github.com/justinas/nosurf"
 )
 
 // The serverError helper writes an error message and stack trace to the errorLog,
@@ -78,8 +79,10 @@ func (app *application) render(w http.ResponseWriter, status int, page string, t
 // It takes a pointer to an http.Request as its parameter and returns a pointer to a templateData struct.
 func (app *application) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
-		CurrentYear: time.Now().Year(),
-		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
+		CurrentYear:     time.Now().Year(),
+		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
+		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 }
 
@@ -123,4 +126,12 @@ func (app *application) decodePostForm(r *http.Request, destination any) error {
 	}
 
 	return nil
+}
+
+// isAuthenticated checks if the user is authenticated.
+//
+// It takes a *http.Request as a parameter.
+// Returns a bool indicating whether the user is authenticated or not.
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), "authenticatedUserID")
 }

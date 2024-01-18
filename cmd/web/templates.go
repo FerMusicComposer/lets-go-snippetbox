@@ -18,6 +18,7 @@ type templateData struct {
 	Form            any
 	Flash           string
 	IsAuthenticated bool
+	CSRFToken       string
 }
 
 // humanDate formats a given time.Time value into a string representation.

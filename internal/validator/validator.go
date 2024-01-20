@@ -35,6 +35,9 @@ func (v *Validator) AddFieldError(key, message string) {
 	}
 }
 
+// AddNonFieldError appends the given message to the NonFieldErrors slice.
+//
+// message string
 func (v *Validator) AddNonFieldError(message string) {
 	v.NonFieldErrors = append(v.NonFieldErrors, message)
 }
@@ -71,11 +74,14 @@ func MaxChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) <= n
 }
 
+// MinChars checks if the string has at least n characters.
+//
+// value string, n int. Returns bool.
 func MinChars(value string, n int) bool {
 	return utf8.RuneCountInString(value) >= n
 }
 
-// PermittedInt checks if a given value is present in a list of permitted values.
+// PermittedValue checks if a given value is present in a list of permitted values.
 //
 // Parameters:
 // - value: the value to be checked.
@@ -83,7 +89,7 @@ func MinChars(value string, n int) bool {
 //
 // Returns:
 // - bool: true if the value is present in the list, false otherwise.
-func PermittedInt(value int, permittedValues ...int) bool {
+func PermittedValue[T comparable](value T, permittedValues ...T) bool {
 	for i := range permittedValues {
 		if value == permittedValues[i] {
 			return true
@@ -92,6 +98,11 @@ func PermittedInt(value int, permittedValues ...int) bool {
 	return false
 }
 
+// Matches checks if the given value matches the provided regular expression.
+//
+// value - the string to be matched
+// rx - the regular expression to match against
+// bool - returns true if the value matches the regular expression, otherwise false
 func Matches(value string, rx *regexp.Regexp) bool {
 	return rx.MatchString(value)
 }

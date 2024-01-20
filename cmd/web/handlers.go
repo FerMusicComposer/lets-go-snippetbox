@@ -314,3 +314,11 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+// ping writes "OK" to the http.ResponseWriter.
+// status-checking or uptime monitoring of the server.
+// w http.ResponseWriter
+// r *http.Request
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}

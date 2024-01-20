@@ -40,6 +40,9 @@ func (app *application) routes() http.Handler {
 	// file will be served (so long as it exists).
 	router.Handler(http.MethodGet, "/static/*filepath", fileServer)
 
+	// Add a new GET /ping route.
+	router.HandlerFunc(http.MethodGet, "/ping", ping)
+
 	// Create a new middleware chain containing the middleware specific to our
 	// dynamic application routes. The static fileServer is no longer included
 	dynamic := alice.New(app.sessionManager.LoadAndSave, noSurf, app.authenticate)

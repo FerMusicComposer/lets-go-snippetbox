@@ -23,11 +23,17 @@ type templateData struct {
 	CSRFToken       string
 }
 
-// humanDate formats a given time.Time value into a string representation.
+// humanDate returns a formatted string representation of the given time.
 //
 // It takes a time.Time parameter and returns a string.
+// If the passed time is zero or empty, it returns an empty string.
 func humanDate(t time.Time) string {
-	return t.Format("02 Jan 2006 at 15:04")
+	// Return the empty string if time has the zero value.
+	if t.IsZero() {
+		return ""
+	}
+	// Convert the time to UTC before formatting it.
+	return t.UTC().Format("02 Jan 2006 at 15:04")
 }
 
 // Initialize a template.FuncMap object and store it in a global variable. This is
